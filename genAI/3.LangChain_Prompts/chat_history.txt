@@ -1,0 +1,6 @@
+HumanMessage(
+    content="Hello, I received a damaged product in my recent Amazon order. I would like a replacement or refund."
+)
+AIMessage(
+    content="I'm sorry for the inconvenience caused. I can help you with a replacement or refund. Please share your order ID so I can assist you further."
+)

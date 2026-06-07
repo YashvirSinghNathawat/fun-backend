@@ -46,8 +46,10 @@ Understanding backend APIs and communication.
 
 ## 📈 Progress Tracking
 
-| Track      | Status      | Notes |
-|------------|------------|-------|
-| Java       | Ongoing    | DSA + Core Concepts |
-| GenAI      | Active     | LangChain → LangGraph |
-| API_Basic  | Ongoing    | Backend fundamentals |
+| Track         | Status  | Notes                 |
+|---------------|---------|-----------------------|
+| Java          | Paused  | DSA + Core Concepts   |
+| GenAI         | Active  | LangChain → LangGraph |
+| API_Basic     | Paused  | Backend fundamentals  |
+| Deep Learning | Ongoing | Deep Learning         |
+| Claude Code   | Ongoing | Claude Code           |

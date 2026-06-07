@@ -191,6 +191,17 @@ Useful command:
 ![image-4.jpg](image-4.jpg)
 ![image-5.jpg](image-5.jpg)
 
+# Enterprise Workflow
+Epic Design
+    ↓
+Task Extraction
+    ↓
+Task Implementation Plan
+    ↓
+Code
+    ↓
+Validation
+
 # Best Practices: Plan Mode
 
 - Create a Design Document before implementation.
@@ -198,3 +209,70 @@ Useful command:
 - Opus = Planning , Sonnet = Implementation.
 - Enable Extended Thinking during planning.
 - Effort - Medium or High
+
+# Custom Slash Commands
+
+- Reusable prompts invoked via `/command`
+- Stored as Markdown files
+
+Types:
+- Project Scoped → `.claude/commands/`
+- User Scoped → `~/.claude/commands/`
+
+Examples:
+- `/review` → Code review
+- `/commit` → Generate commit message
+- `/test` → Run tests
+- `/security-scan` → Security checks
+
+Benefits:
+- Automate workflows
+- Improve consistency
+- Save time
+
+# Skills
+**Purpose:** Convert Claude from a generalist into a specialist.
+
+### Example: PPT Generation
+**Knows:** PowerPoint, slide structure, content, libraries  
+**Doesn't Know:** Branding, fonts, layouts, chart placement, company standards
+
+### Problem
+LLMs don't perform well on specialized tasks.
+
+### Traditional Solution
+Write detailed prompts.
+
+**Issues:**
+- Retype every time
+- Burns context window
+- Hard to bundle resources
+- Hard to share/version
+- Hard to improve
+- Prompts don't compose
+
+### Solution: Skills
+
+Skills are reusable, file-based resources that provide Claude with domain-specific expertise such as workflows, context, and best practices that transform general-purpose agents into specialists.
+
+- Skills loads on demand
+- No need to give same guidance across multiple sessions
+
+### Progressive Disclosure
+Core idea - don't present information until the moment
+it's needed.
+**L1:** Description  
+**L2:** `SKILL.md`  
+**L3:** Resources
+![alt text](image-2.png)
+
+### Scope
+`~/.claude/skills` → Personal  
+`.claude/skills` → Project
+
+### Creation
+**Methods:** Manual | `skill-creator`
+
+**Flow to Create Skill:** Need → `SKILL.md` → Resources → Test → Refine
+
+Read - https://medium.com/@universe3523/spec-driven-development-with-claude-code-206bf56955d0

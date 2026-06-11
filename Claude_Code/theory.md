@@ -276,3 +276,89 @@ it's needed.
 **Flow to Create Skill:** Need → `SKILL.md` → Resources → Test → Refine
 
 Read - https://medium.com/@universe3523/spec-driven-development-with-claude-code-206bf56955d0
+
+# Subagents
+
+## Why Subagents?
+
+- Stateless LLMs - does not remember old interactions
+- Context Window Overflow - To maintain context in task, we often resend the entire codebase in every call.
+- Lost in the Middle Effect - LLMS pay most attention to start and end of context. Middle gets foggy.
+
+
+## What are Subagents?
+
+Specialized AI assistants that run in isolated contexts, perform focused tasks, and return only relevant results.
+
+## Advantages
+
+- Context Isolation
+- Specialization (Research, Coding, Review)
+- Parallelism
+- Modularity (Analyze → Plan → Implement → Review → Test)
+
+## Top Use Cases
+
+- Codebase Exploration
+- Independent Code Review
+- Testing
+- Multi-Stage Pipelines
+- Parallel Independent Tasks
+- Security Auditing
+
+## Built-in Subagents
+
+### Explore
+
+- Explore and understand the codebase
+
+### Plan
+
+- Create implementation plans
+
+### General Purpose
+
+- Read and write code
+
+## Custom Subagents
+
+### Configuration
+
+- Tools
+- Prompt
+- Model
+- Permissions
+- Hooks
+- Skills
+
+### Examples
+
+- Security Reviewer
+- Research Agent
+- Code Writer
+
+## Why Custom Subagents?
+
+- Built-in agents are generic
+- Enable specialized workflows
+- Support custom tools, prompts, and models
+
+## Creating Custom Subagents
+
+1. Create a Markdown file
+2. Store it in `.claude/agents`
+
+### Storage Locations
+
+- Project Level
+- Personal Level
+
+## Triggering Subagents
+1. Automatic
+2. Explicit
+
+
+## Example Workflows
+1. `/test-feature` - Test Writer → Test Runner
+2. `/self-code-review` - Security Review → Code Quality Review
+

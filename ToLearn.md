@@ -10,8 +10,9 @@ Backend Architecture
 
 Future
 1. Apache Karaf
+2. Backend from First Principles - Sriniously
+3. Spring Boot - Spring Boot - Concept && Coding
 
 Currently - 
-1. Backend from First Principles - Sriniously
-2. Spring Boot - Spring Boot - Concept && Coding
+1. Java - Concept && Coding
 3. Claude Code - CampusX

@@ -1,6 +1,11 @@
 # Table of Contents
 1. [OOPS](#oops)
 2. [Java and its 3 Main Components](#java-and-its-3-main-components-)
+3. [Java Primitive Variables](#java-primitive-variables)
+4. [Java Non Primitive Variables](#java-non-primitive-variables)
+5. [Methods and Constructor](#methods-and-constructor)
+6. [Java Memory Management](#java-memory-management)
+7. [Classes in Java](#classes-in-java)
 
 ---
 
@@ -266,4 +271,206 @@ public class Teacher {}
 
 `Teacher` cannot be public here — the file name can only match one class.
 
+---
 
+# Java Primitive Variables
+1. Notes - https://drive.google.com/file/d/1vWVJ9nAIbih0vier0XD-jFaUCujWuYnU/view
+
+---
+
+**Q: What is the default value behavior for class member variables vs local variables?**
+
+- **Class member variables** are automatically assigned default values by the JVM.
+- **Local variables** must be explicitly assigned before use, otherwise the compiler throws an error.
+
+```java
+class Employee {
+    int age;       // default: 0
+    String name;   // default: null
+    boolean active; // default: false
+}
+
+class Main {
+    void show() {
+        int x;
+        System.out.println(x); // Compile error: variable x might not have been initialized
+    }
+}
+```
+
+| Type | Default Value |
+|---|---|
+| `int`, `long`, `short`, `byte` | `0` |
+| `float`, `double` | `0.0` |
+| `boolean` | `false` |
+| `char` | `NULL` |
+| Object reference | `null` |
+
+---
+
+**Q: What are `float` and `double` in Java? How is their data stored?**
+
+`float` and `double` are primitive types for decimal numbers, following the **IEEE 754 standard**. A number is stored in three parts: **sign bit**, **exponent**, and **mantissa**.
+
+| Feature | `float` | `double` |
+|---------|---------|----------|
+| Size | 4 bytes (32 bits) | 8 bytes (64 bits) |
+| Sign bits | 1 | 1 |
+| Exponent bits | 8 | 11 |
+| Mantissa bits | 23 | 52 |
+| Precision | ~6–7 decimal digits | ~15–16 decimal digits |
+| Default decimal type | No | Yes |
+
+`double` provides higher precision and a larger range because it allocates more bits to the exponent and mantissa.
+
+
+---
+
+# Java Reference/Non Primitive Variables
+1. Notes - https://drive.google.com/file/d/19qwmrufd4UeZmNzsDA0dcegqokiJL2IE/view?usp=sharing
+
+
+**Q: How are String objects stored in Java memory?**
+
+```java
+String s1 = "hello";
+String s2 = "hello";
+String s3 = new String("hello");
+```
+
+String literals are stored in the **String Constant Pool (SCP)** inside the heap.
+- `s1` creates `"hello"` in SCP.
+- `s2` reuses the same `"hello"` object from SCP.
+- `new String("hello")` creates a new object in the normal heap, so `s3` points to a different object.
+
+```
+SCP:          "hello"
+               ↑   ↑
+              s1   s2
+
+Heap:         "hello"
+                ↑
+               s3
+```
+
+**Total objects created: 2**
+- 1 object in String Constant Pool
+- 1 object in Heap
+
+```java
+s1 == s2      // true  (same SCP reference)
+s1 == s3      // false (different objects)
+s1.equals(s3) // true  (same content)
+```
+
+---
+
+# Methods and Constructor
+1. Notes - https://drive.google.com/drive/folders/1JehUMQvwNDTEqpjoSQo8PZiUn2UxWi9x?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto
+
+---
+
+**Q: What is the difference between default and protected access modifiers in Java?**
+
+The main difference is in their accessibility scope:
+
+- `default` (package-private) members are accessible only within the same package.
+- `protected` members are accessible within the same package and also in subclasses, even if those subclasses are in a different package.
+
+Suppose `Parent` is in package A and `Child` extends `Parent` in package B.
+
+```java
+// Package A
+public class Parent {
+    void defaultMethod() { }
+    protected void protectedMethod() { }
+}
+```
+
+```java
+// Package B
+public class Child extends Parent {
+    public void test() {
+        // defaultMethod();   // Compilation Error
+        protectedMethod();    // Works
+    }
+}
+```
+
+`defaultMethod()` cannot be accessed because it is limited to package A, whereas `protectedMethod()` can be accessed through inheritance in `Child`.
+
+---
+
+**Q: Why is the return type ignored in method overloading?**
+
+Method overloading is resolved using the method name and parameter list. The return type is ignored because the compiler cannot determine which method to call based only on the return type.
+
+```java
+int add(int a, int b) { return a + b; }
+// double add(int a, int b) { return a + b; } // Compilation Error
+```
+
+add(10,20) it will call what? <-- Ambiguity
+
+---
+
+**Q: What issue would occur if static methods were allowed to directly access non-static methods?**
+
+A non-static method belongs to a specific object, but a static method has no object context (`this`). If multiple objects exist, the compiler would not know which object's method should be called.
+
+```java
+class Employee {
+    String name;
+
+    void printName() {
+        System.out.println(name);
+    }
+
+    static void show() {
+        printName(); // Which Employee object's printName()?
+    }
+}
+```
+
+`show()` has no way to determine whether it should call `printName()` for `employee1`, `employee2`, or any other object.
+
+Static methods belong to the class and are loaded into the Method Area (Metaspace) when the class is loaded. They can be called without creating an object.
+
+Non-static methods are also stored in the Method Area (Metaspace), but they execute in the context of a specific object and require a `this` reference to access instance variables stored in the heap.
+
+---
+
+**Q: Why are static methods not overridden in Java? What issue would it cause?**
+
+Static methods belong to the class, not to an object. Method overriding relies on runtime polymorphism, where the method to execute is decided based on the actual object's type. Since static methods can be called without an object, they are resolved at compile time, not runtime.
+
+If static methods could be overridden, it would create confusion because the compiler and runtime could potentially select different methods.
+
+```java
+class Parent {
+    static void show() {
+        System.out.println("Parent");
+    }
+}
+
+class Child extends Parent {
+    static void show() {
+        System.out.println("Child");
+    }
+}
+
+Parent p = new Child();
+p.show(); // Output: Parent
+```
+
+The method called depends on the reference type (`Parent`), not the object type (`Child`). This is called **method hiding**, not overriding.
+
+---
+
+# Java Memory Management
+1. Notes - https://drive.google.com/file/d/1DZKdTORtASz2sbMUPtLUI9g6uC2mPNAJ/view?usp=sharing
+
+---
+
+# Classes in Java
+1. Notes - https://drive.google.com/file/d/1eE5Pculcp0qem6tMPHDz9h-jhMclzGIt/view?usp=sharing

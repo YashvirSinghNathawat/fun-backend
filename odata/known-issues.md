@@ -4,7 +4,24 @@
 
 ## OData V2
 
-_No known issues yet._
+### Issue 1: GET_FEED Fails Mid-Pagination — Remote Host Terminates TLS Connection
+
+**Problem:**
+
+When using snapshot-based paging (`paging=snapshot`) with Process in Pages disabled, the adapter fetches all pages in a single execution loop. After a large number of successful pages, the remote server abruptly terminates the TLS connection during the handshake of a subsequent request — using a `$skiptoken` that the server itself issued in the previous response. No HTTP response is returned.
+
+```
+java.io.EOFException: SSL peer shut down incorrectly
+Remote host terminated the handshake
+```
+
+The adapter retries the failed request but receives the same error on each attempt, ultimately throwing `OsciException` and failing the iFlow.
+
+**Likely cause:** The `$skiptoken` for snapshot-based paging encodes the origin server node. If a subsequent request is routed to a different server node (e.g. due to load balancing), that node does not hold the snapshot and drops the connection.
+
+**OData adapter verdict:** Working as expected. The adapter correctly constructs all requests, follows the server-issued skiptoken, and retries on failure. The fault is server-side.
+
+**Recommendation:** Enable Process in Pages to make the flow resilient to mid-run connection drops, so each page is committed independently rather than the entire fetch failing as one unit.
 
 ---
 

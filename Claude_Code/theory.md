@@ -362,3 +362,51 @@ Specialized AI assistants that run in isolated contexts, perform focused tasks, 
 1. `/test-feature` - Test Writer → Test Runner
 2. `/self-code-review` - Security Review → Code Quality Review
 
+---
+
+# Output Hygiene — 5× Tax
+
+Output tokens cost ~5× more than input tokens. Don't pay Claude to repeat information it already has.
+
+Avoid:
+- Reprinting entire files
+- Echoing long logs/diffs
+- Verbose step-by-step narration
+- Regenerating boilerplate
+
+Do:
+- Ask for concise diffs
+- Edit files in place
+- Summarize changes briefly
+- Let hooks/formatters handle formatting
+
+## CLAUDE.md
+Be concise. Edit in place; don't reprint files.
+Prefer diffs/summaries over full files.
+Don't echo logs or narrate routine steps.
+
+---
+
+# Fewer Turns — Stop Re-sending Context
+
+Every turn resends context. More turns = more input tokens and cost.
+
+## Why turns cost
+- Full context is sent again each turn
+- Many small turns cost more than one planned turn
+- Cache helps, but reasoning still costs
+
+## Cut turn count
+- Plan first, then execute
+- Give complete instructions upfront
+- Use `/clear` for stale context
+- Press Esc when Claude goes down the wrong path
+
+## Expensive
+Add field → validate → migrate → test
+4 turns × full context
+
+## Cheap
+Plan field + validation + migration + tests → approve → execute
+
+> Rule: Think before it types. Fewer, better turns = lower cost.

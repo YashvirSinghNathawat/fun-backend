@@ -6,6 +6,7 @@
 5. [Methods and Constructor](#methods-and-constructor)
 6. [Java Memory Management](#java-memory-management)
 7. [Classes in Java](#classes-in-java)
+8. [POJO Class, ENUM, Singleton Class](#pojo-class-enum-singleton-class)
 
 ---
 
@@ -474,3 +475,224 @@ The method called depends on the reference type (`Parent`), not the object type 
 
 # Classes in Java
 1. Notes - https://drive.google.com/file/d/1eE5Pculcp0qem6tMPHDz9h-jhMclzGIt/view?usp=sharing
+
+## Types of Classes
+- Concrete Class
+- Abstract Class
+- Object Class
+- Nested Class
+- Generic Class(Bounded, Multibounded, Wildcards, Unbounded, Type Erasure)
+- POJO Class
+- ENUM Class
+- Final Class
+- Singleton Class
+- Immutable Class
+- Wrapper Class
+
+---
+
+## POJO Class, ENUM, Singleton Class, Immutable Class, Wrapper Class
+- Bill Pugh Solution Singleton
+- Enum Singleton
+- Immutable Class
+
+1. Notes - https://drive.google.com/file/d/1nQeNeDueOQLrb-2eLM1bab47YyzZ1AFg/view?usp=sharing
+
+---
+
+**Q: When should we use enums?**
+
+Use enums when a variable has a fixed set of possible values.
+
+```java
+enum Status {
+    PENDING, APPROVED, REJECTED
+}
+```
+
+Rule: Fixed values → Enum. Dynamic values → String/Class/DB.
+
+---
+
+**Q: Why should the Singleton instance be declared volatile in Double-Checked Locking?**
+
+In Double-Checked Locking, `volatile` is required because it provides visibility between threads and prevents instruction reordering.
+
+```java
+public class DBConnection {
+
+    private static volatile DBConnection conObject;
+
+    public static DBConnection getInstance() {
+        if (conObject == null) {
+            synchronized (DBConnection.class) {
+                if (conObject == null) {
+                    conObject = new DBConnection();
+                }
+            }
+        }
+        return conObject;
+    }
+}
+```
+
+**1. Visibility**
+
+Each thread may have values cached locally by the CPU.
+
+Without `volatile`, Thread 2 may not observe Thread 1's update:
+
+```
+Thread 1                  Thread 2
+---------                 ---------
+cache: flag = false       cache: flag = false
+
+flag = true
+   ↓
+may remain in
+Thread 1's cache
+
+                          reads flag
+                          ↓
+                     may see false
+```
+
+With `volatile boolean flag`, when Thread 1 writes `flag = true`, the JVM provides the required memory visibility and ordering guarantees so Thread 2 sees the updated value:
+
+```
+Thread 1                         Thread 2
+---------                        ---------
+flag = true
+   ↓
+volatile write
+   ↓
+visibility guarantee  ────────→ volatile read
+                                  ↓
+                              sees true
+```
+
+Note: `volatile` does not mean "always store/read directly from RAM." It provides the Java Memory Model's required visibility and ordering guarantees.
+
+**2. Prevents instruction reordering**
+
+`conObject = new DBConnection()` involves three steps: allocate memory, initialize the object, assign the reference.
+
+Without `volatile`, the JVM/CPU could reorder these so another thread sees a non-null reference before the object is fully initialized:
+
+```
+Thread 1                         Thread 2
+---------                        ---------
+Allocate memory
+       ↓
+Assign reference
+conObject != null
+       ↓
+                                  sees conObject != null
+                                  ↓
+                                  uses uninitialized object
+       ↓
+Initialize object
+```
+
+With `private static volatile DBConnection conObject`, the volatile write provides the necessary ordering guarantees, preventing this unsafe publication.
+
+**In short:**
+
+`volatile` in Double-Checked Locking = visibility + ordering
+
+It ensures that when one thread publishes the Singleton instance, other threads see the correctly initialized instance.
+
+---
+
+**Q: What is the most popular way to implement a Singleton in Java?**
+
+The Enum Singleton is one of the safest and simplest approaches, but in everyday Java development, dependency injection (e.g., Spring's default singleton scope) is often preferred.
+
+**1. Enum Singleton**
+
+```java
+public enum DBConnection {
+    INSTANCE;
+
+    public void connect() {
+        // ...
+    }
+}
+```
+
+Usage:
+```java
+DBConnection.INSTANCE.connect();
+```
+
+Why popular?
+- Thread-safe by default
+- Simple
+- Handles serialization correctly
+- Protected against reflection-based multiple instances
+
+**2. In Spring applications**
+
+```java
+@Service
+public class DBService {
+}
+```
+
+Spring creates one instance per application context by default, so you normally don't implement Singleton yourself.
+
+**Rule:**
+
+Plain Java → Enum Singleton is a strong choice.
+Spring → Use Spring's singleton scope/DI rather than manually implementing Singleton.
+
+---
+
+**Q: What is a Wrapper Class?**
+
+A wrapper class converts a primitive into an object.
+
+| Primitive | Wrapper |
+|---|---|
+| `int` | `Integer` |
+| `long` | `Long` |
+| `double` | `Double` |
+| `boolean` | `Boolean` |
+| `char` | `Character` |
+
+```java
+int x = 10;
+Integer y = 10;
+```
+
+Use: When Java requires an object instead of a primitive, such as in `List<Integer>`.
+
+---
+
+**Q: When should we use an immutable class in practical Java development?**
+
+Use an immutable class when an object's state should never change after creation.
+
+Common scenarios:
+- **DTOs / request objects** → data should not change unexpectedly.
+- **Configuration objects** → settings should remain fixed.
+- **Value objects** → e.g., `Money`, `Address`, `Email`.
+- **Multi-threaded code** → safe to share between threads without synchronization.
+- **Cache keys** → safe to use as `HashMap`/`HashSet` keys.
+
+```java
+public final class Money {
+    private final int amount;
+    private final String currency;
+
+    public Money(int amount, String currency) {
+        this.amount = amount;
+        this.currency = currency;
+    }
+
+    public int getAmount() { return amount; }
+    public String getCurrency() { return currency; }
+}
+```
+
+Rule: If the object's value should remain fixed and predictable after creation → use an immutable class.

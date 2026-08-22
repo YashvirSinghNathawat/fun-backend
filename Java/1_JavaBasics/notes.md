@@ -6,7 +6,7 @@
 5. [Methods and Constructor](#methods-and-constructor)
 6. [Java Memory Management](#java-memory-management)
 7. [Classes in Java](#classes-in-java)
-8. [POJO Class, ENUM, Singleton Class](#pojo-class-enum-singleton-class)
+8. [POJO Class, ENUM, Singleton Class](#pojo-class-enum-singleton-class-immutable-class-wrapper-class)
 
 ---
 
@@ -511,6 +511,61 @@ enum Status {
 ```
 
 Rule: Fixed values → Enum. Dynamic values → String/Class/DB.
+
+---
+
+**Q: In what practical scenarios should we use final classes? Provide real-world examples.**
+
+A `final` class cannot be extended. Use it in these scenarios:
+
+**1. Immutable Classes**
+```java
+final class ImmutableUser {
+    private final String name;
+    private final int age;
+    
+    public ImmutableUser(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    public String getName() { return name; }
+    public int getAge() { return age; }
+}
+```
+Real-world: `String`, `Integer`, `LocalDate` — prevent subclasses from breaking immutability.
+
+**2. Security-Sensitive Classes**
+```java
+final class SecurityKey {
+    private final String secretKey;
+    
+    public SecurityKey(String key) {
+        this.secretKey = key;
+    }
+}
+```
+Real-world: Encryption keys, authentication tokens — prevent malicious subclasses from exposing secrets.
+
+**3. Performance-Critical Classes**
+```java
+final class FastCalculator {
+    public int calculate(int a, int b) {
+        return a + b;
+    }
+}
+```
+Real-world: The JVM can inline method calls in `final` classes without checking for overrides, improving performance.
+
+**4. API Design - Prevent Abuse**
+```java
+final class DatabaseConnection {
+    // Should not be extended/modified by third-party code
+}
+```
+Real-world: Core framework classes like `java.util.Collections`, `java.lang.Runtime` — prevent unwanted customization.
+
+**Rule:** Use `final` when you want to guarantee immutability, security, or performance. Avoid over-using it as it limits flexibility.
 
 ---
 

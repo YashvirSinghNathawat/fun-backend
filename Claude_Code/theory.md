@@ -1,197 +1,228 @@
 # Claude Code
 ![alt text](image.png)
 
+---
+
+## Table of Contents
+
+### 1. AI & Coding Philosophy
+- [AI-Assisted Coding: Augmentation, Not Replacement](#ai-assisted-coding-augmentation-not-replacement)
+- [Risks](#risks)
+- [Effective Human in the Loop](#effective-human-in-the-loop)
+- [Problem with Vibe Coding](#problem-with-vibe-coding)
+
+### 2. Getting Started
+- [Project Lifecycle](#project-lifecycle)
+- [Slash Commands](#slash-commands)
+- [Context Window Management](#context-window-management)
+- [CLAUDE.md](#claudemd)
+- [.claude Folder](#claude-folder)
+- [Good Practices](#good-practices)
+- [Large Repositories](#large-repositories)
+
+### 3. Memory & Context
+- [Auto Memory](#auto-memory)
+
+### 4. Workflows & Planning
+- [Spec Driven Development](#spec-driven-development)
+- [Enterprise Workflow](#enterprise-workflow)
+- [Plan Mode & Extended Thinking](#plan-mode--extended-thinking)
+
+### 5. Extensibility
+- [Custom Slash Commands](#custom-slash-commands)
+- [Skills](#skills)
+- [Subagents](#subagents)
+- [Git Worktrees](#git-worktrees)
+- [Playwright MCP](#playwright-mcp)
+
+### 6. Cost Efficiency
+- [Output Hygiene](#output-hygiene--5-tax)
+- [Fewer Turns](#fewer-turns--stop-re-sending-context)
+
+---
+
+# 1. AI & Coding Philosophy
+
+## AI-Assisted Coding: Augmentation, Not Replacement
+
+AI writes code. Humans own the thinking.
+
+Humans must own:
+- **Business requirements** — what to build and why
+- **Architecture** — structure, boundaries, tradeoffs
+- **Judgment** — when a correct solution is still the wrong one
+
+AI amplifies good engineering. It does not replace it.
+
+> Engineers who understand the problem get 10× from AI. Those who don't just ship bugs faster.
+
+## Risks
+
+- **Hallucinations** — AI confidently generates wrong code. Always verify output.
+- **Technical debt** — AI favors quick, working solutions over clean ones. It duplicates code instead of reusing, skips abstractions, and ignores existing patterns. Each shortcut is small; accumulated across a codebase, they create systems that are hard to change and expensive to maintain.
+- **Security vulnerabilities** — hardcoded credentials, insecure auth, outdated dependencies with known CVEs.
+
+> Never merge AI code you haven't read.
+
+## Effective Human in the Loop
+
+- **Understand the code** — Read what AI generates. If you can't explain it, don't ship it.
+- **Skills to spot problems** — Engineering fundamentals matter more, not less. You need to catch what AI misses.
+- **Test everything** — AI-generated tests often test the wrong thing. Write tests that verify intent, not just output.
+- **Maintain context** — AI has no memory of past decisions. You carry the architecture, constraints, and history.
+- **Stay accountable** — The code is yours. AI is a tool; you own the consequences.
+
 ## Problem with Vibe Coding
+
+Accepting AI output without understanding it.
+
 - Hidden bugs and edge cases
 - Inconsistent architecture
+- Nobody can maintain the result
 
-## Claude Code Slash Commands
+---
+
+# 2. Getting Started
+
+## Project Lifecycle
+
+Claude Code assists at every stage:
+
+```
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐
+│   Discover  │→ │   Design    │→ │    Build    │→ │   Deploy    │→ │ Support & Scale │
+├─────────────┤  ├─────────────┤  ├─────────────┤  ├─────────────┤  ├─────────────────┤
+│ Explore     │  │ Plan        │  │ Implement   │  │ Automate    │  │ Debug errors    │
+│ codebase    │  │ project     │  │ code        │  │ CI/CD       │  │                 │
+│             │  │             │  │             │  │             │  │ Monitor usage   │
+│ Search docs │  │ Define      │  │ Write &     │  │ Configure   │  │ & performance   │
+│             │  │ architecture│  │ run tests   │  │ environments│  │                 │
+│ Onboard &   │  │             │  │             │  │             │  │                 │
+│ setup       │  │ Tech specs  │  │ Commits,    │  │ Manage      │  │                 │
+│             │  │             │  │ PRs, refactor│  │ deployments │  │                 │
+└─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────────┘
+```
+
+## Slash Commands
 ![alt text](image-1.png)
 
+### `/ide`
+Connects Claude Code to your IDE (VS Code, JetBrains). Enables Claude to see your open file, cursor position, and diagnostics — so it has the same context you do without needing to paste code.
 
-### Understanding new code
-
+### Understanding New Code
 1. What does this project do?
 2. Which tech stack does this project use?
 3. Explain the project structure to me.
-4. Write clear prompt and use @{filepath}
+4. Write clear prompt and use `@{filepath}`
 
 ## Context Window Management
 ![alt text](image-3.png)
 
+## CLAUDE.md
 
-## Why `CLAUDE.md`?
+LLM-based tools do not remember previous sessions. `CLAUDE.md` acts as persistent project context.
 
-LLM-based tools like Claude do not remember previous sessions.  
-Repeating instructions every session is:
-- Time consuming
-- Error-prone
-- Leads to inconsistent code generation
+### Why?
+- Avoids repeating instructions every session
+- Ensures consistent code generation
 
-`CLAUDE.md` acts as persistent project context for Claude.
-
-It typically contains:
-- Project structure
-- Coding conventions
-- Run/build/test commands
-- Preferred tools/frameworks
-
----
-
-# Creating `CLAUDE.md`
+### Creating CLAUDE.md
 
 Two ways:
 1. Manually
-2. Using:
+2. Using `/init` — scans config files, reads folder structure, infers tech stack. ~30% useful directly; rest should be customized.
 
-```bash
-/init
-```
+### What to Include
 
----
+| Section | Purpose |
+|---|---|
+| **Project Context** | Short description of the project |
+| **Architecture** | Where routes, services, schemas, repositories live |
+| **Code Style** | Type hints, function size, existing patterns |
+| **Commands** | Run, test, install commands |
+| **Preferred Libraries** | Allowed frameworks; no new deps without reason |
+| **Critical Rules** | Hard constraints — files not to touch, ID policies |
 
-# Why `/init` Helps
-
-Useful when:
-- Working on an existing codebase
-- Large repositories
-- New to `CLAUDE.md`
-- Building quick prototypes
-
-`/init`:
-- Scans config files (`package.json`, `README.md`, etc.)
-- Reads folder structure
-- Infers tech stack and conventions
-
-Usually:
-- ~30% useful directly
-- Remaining should be customized manually
-
----
-
-# What `CLAUDE.md` Should Have
-
-## Project Context
-Short description of the project.
-
-## Architecture
-Where routes, services, schemas, repositories live.
-
-Example:
-- Routes live in `routers/` — define endpoints, handle HTTP in/out
-- Business logic lives in `services/` — core app logic, orchestration
-- Schemas live in `schemas/` — request/response validation and serialization
-- Persistence logic lives in `repository/` — all database queries
-
-## Code Style
-
-Example:
-- Use type hints
-- Keep functions small
-- Prefer existing patterns
-
-## Commands
-Lists exact commands for running, testing, and
-maintaining the project
-- Install dependencies: `pip install -r requirements.txt`
-- Run dev server: `uvicorn main:app --reload`
-- Run tests: `pytest`
-
-## Preferred Libraries
-
-Specify allowed frameworks/tools like
-- Use FastAPI for APIs
-- Use Pydantic for validation
-- Use SQLAlchemy for ORM
-- Do not introduce new dependencies unless necessary
-
-## Critical Rules
-
-Important warnings and constraints like 
-- Do not modify "database.py' unless absolutely
-necessary.
-- Patient IDs are provided by the client; do not
-auto-generate UUIDs.
-
----
-
-# `.claude` Folder
-
-Stores Claude configuration:
-- Skills
-- Custom commands
-- Sub-agents
-- Project workflows
-
-Types:
-- `CLAUDE.md` → shared project config
-- `CLAUDE.local.md` → personal gitignored config
-- `~/.claude/CLAUDE.md` → global preferences
-- Subdirectory `CLAUDE.md` → folder-specific rules
-
----
-
-# Good Practices
-
+### Good Practices
 - Start with `/init`, then prune
 - Keep under ~200 lines
 - Only add rules that prevent mistakes
-- Commit to git
-- Use emphasis IMPORTANT only if needed
-- Treat it as a living document
-- Only put universal things applicable to full project.
+- Commit to git; treat as a living document
 - Audit periodically
 
-Rule:
 > If removing a rule changes nothing, delete it.
 
----
+### Large Repositories
 
-# Large Repositories
-
-Split rules(Loaded Lazily) into:
-
-```bash
-.claude/rules/
-```
-
-Examples:
+Split rules (loaded lazily) into `.claude/rules/`:
 - `code-style.md`
 - `testing.md`
 - `security.md`
 
 Reference docs using:
-
 ```md
 See @docs/api-guidelines.md
 ```
 
+## `.claude` Folder
+
+Stores all Claude configuration:
+
+| File/Path | Purpose |
+|---|---|
+| `CLAUDE.md` | Shared project config |
+| `CLAUDE.local.md` | Personal, gitignored config |
+| `~/.claude/CLAUDE.md` | Global preferences |
+| Subdirectory `CLAUDE.md` | Folder-specific rules |
+| `.claude/commands/` | Custom slash commands |
+| `.claude/agents/` | Custom subagents |
+| `.claude/rules/` | Lazily loaded rule files |
+| `.claude/skills/` | Project-scoped skills |
+| `.claude/plans/` | Implementation plans |
+
 ---
 
-# Auto Memory
+# 3. Memory & Context
 
-Claude can store persistent project learnings. Only first 200 likes of memory.md is loaded so maintain properly.
+## Auto Memory
 
-Example:
-> “Project uses INR instead of USD”
+Claude stores persistent project learnings across sessions. Only the first 200 lines of `memory.md` are loaded — keep it concise.
 
 Location:
-
 ```bash
 ~/.claude/projects/<project>/memory/
 ```
 
 Useful command:
-
 ```bash
 /memory
 ```
 
-# Spec Drive Development
+### `#` — Quick Memory Shortcut
+
+Type `#` followed by a note to instantly add context to memory. Useful when Claude repeats an error or needs project-specific knowledge.
+
+```
+#use uv to run python files or add any dependencies
+```
+
+```
+#The vector database has two collections:
+- course_catalog: course titles, instructor, course_link, lesson_count, lessons_json
+- course_content: text chunks for semantic search with course_title, lesson_number, chunk_index
+```
+
+---
+
+# 4. Workflows & Planning
+
+## Spec Driven Development
 ![image-4.jpg](image-4.jpg)
 ![image-5.jpg](image-5.jpg)
 
-# Enterprise Workflow
+## Enterprise Workflow
+
+```
 Epic Design
     ↓
 Task Extraction
@@ -201,212 +232,192 @@ Task Implementation Plan
 Code
     ↓
 Validation
+```
 
-# Best Practices: Plan Mode
+## Plan Mode & Extended Thinking
 
-- Create a Design Document before implementation.
-- Use Plan Mode and store in `.claude/plans/`.
-- Opus = Planning , Sonnet = Implementation.
-- Enable Extended Thinking during planning.
-- Effort - Medium or High
+### Plan Mode
+- Create a design document before implementation
+- Store plans in `.claude/plans/`
+- Opus = Planning, Sonnet = Implementation
+- Enable Extended Thinking during planning — Effort: Medium or High
 
-# Custom Slash Commands
+### Extended Thinking Mode
 
-- Reusable prompts invoked via `/command`
-- Stored as Markdown files
+Trigger deeper reasoning with keywords:
 
-Types:
-- Project Scoped → `.claude/commands/`
-- User Scoped → `~/.claude/commands/`
+```
+think  <  think hard  <  think harder  <  ultrathink
+```
 
-Examples:
-- `/review` → Code review
-- `/commit` → Generate commit message
-- `/test` → Run tests
-- `/security-scan` → Security checks
+Each level allocates more thinking budget to Claude.
 
-Benefits:
-- Automate workflows
-- Improve consistency
-- Save time
+**When to use:**
+- Complex architectural changes
+- Debugging complicated issues
+- Tradeoff analysis across multiple options
 
-# Skills
+---
+
+# 5. Extensibility
+
+## Custom Slash Commands
+
+Reusable prompts stored as Markdown files, invoked via `/command`.
+
+| Scope | Location |
+|---|---|
+| Project | `.claude/commands/` |
+| Personal | `~/.claude/commands/` |
+
+Examples: `/review`, `/commit`, `/test`, `/security-scan`
+
+## Skills
+
 **Purpose:** Convert Claude from a generalist into a specialist.
 
-### Example: PPT Generation
-**Knows:** PowerPoint, slide structure, content, libraries  
-**Doesn't Know:** Branding, fonts, layouts, chart placement, company standards
+**Problem with prompts:** Retype every time, burns context window, hard to share/version/improve, prompts don't compose.
 
-### Problem
-LLMs don't perform well on specialized tasks.
-
-### Traditional Solution
-Write detailed prompts.
-
-**Issues:**
-- Retype every time
-- Burns context window
-- Hard to bundle resources
-- Hard to share/version
-- Hard to improve
-- Prompts don't compose
-
-### Solution: Skills
-
-Skills are reusable, file-based resources that provide Claude with domain-specific expertise such as workflows, context, and best practices that transform general-purpose agents into specialists.
-
-- Skills loads on demand
-- No need to give same guidance across multiple sessions
+**Solution:** Skills are reusable, file-based resources providing domain-specific expertise — loaded on demand.
 
 ### Progressive Disclosure
-Core idea - don't present information until the moment
-it's needed.
-**L1:** Description  
-**L2:** `SKILL.md`  
-**L3:** Resources
+Don't load information until the moment it's needed.
+
+- **L1:** Description (trigger)
+- **L2:** `SKILL.md` (instructions)
+- **L3:** Resources (examples, templates)
+
 ![alt text](image-2.png)
 
 ### Scope
-`~/.claude/skills` → Personal  
-`.claude/skills` → Project
+- `~/.claude/skills` → Personal
+- `.claude/skills` → Project
 
 ### Creation
 **Methods:** Manual | `skill-creator`
 
-**Flow to Create Skill:** Need → `SKILL.md` → Resources → Test → Refine
+**Flow:** Need → `SKILL.md` → Resources → Test → Refine
 
-Read - https://medium.com/@universe3523/spec-driven-development-with-claude-code-206bf56955d0
+Read: https://medium.com/@universe3523/spec-driven-development-with-claude-code-206bf56955d0
 
-# Subagents
+## Subagents
 
-## Why Subagents?
+**Why:** LLMs are stateless, context windows overflow, and the "lost in the middle" effect makes long contexts unreliable.
 
-- Stateless LLMs - does not remember old interactions
-- Context Window Overflow - To maintain context in task, we often resend the entire codebase in every call.
-- Lost in the Middle Effect - LLMS pay most attention to start and end of context. Middle gets foggy.
+**What:** Specialized AI assistants running in isolated contexts — perform focused tasks, return only relevant results.
 
-
-## What are Subagents?
-
-Specialized AI assistants that run in isolated contexts, perform focused tasks, and return only relevant results.
-
-## Advantages
-
-- Context Isolation
+### Advantages
+- Context isolation
 - Specialization (Research, Coding, Review)
 - Parallelism
-- Modularity (Analyze → Plan → Implement → Review → Test)
+- Modularity: Analyze → Plan → Implement → Review → Test
 
-## Top Use Cases
+### Built-in Subagents
 
-- Codebase Exploration
-- Independent Code Review
-- Testing
-- Multi-Stage Pipelines
-- Parallel Independent Tasks
-- Security Auditing
+| Agent | Purpose |
+|---|---|
+| **Explore** | Understand the codebase |
+| **Plan** | Create implementation plans |
+| **General Purpose** | Read and write code |
 
-## Built-in Subagents
+### Custom Subagents
 
-### Explore
+Configure with: Tools, Prompt, Model, Permissions, Hooks, Skills
 
-- Explore and understand the codebase
+**Storage:** `.claude/agents/` (project) or `~/.claude/agents/` (personal)
 
-### Plan
+**Triggering:** Automatic or Explicit
 
-- Create implementation plans
+**Example workflows:**
+- `/test-feature` → Test Writer → Test Runner
+- `/self-code-review` → Security Review → Code Quality Review
 
-### General Purpose
+## Git Worktrees
 
-- Read and write code
+Check out multiple branches simultaneously in separate directories — all sharing the same Git history.
 
-## Custom Subagents
+```
+my-project/
+├── main/       → main branch
+├── feature-a/  → feature-a branch
+└── feature-b/  → feature-b branch
+```
 
-### Configuration
+**Why:** Run multiple AI agents on separate features in parallel — no branch switching, no file conflicts.
 
-- Tools
-- Prompt
-- Model
-- Permissions
-- Hooks
-- Skills
+### Commands
 
-### Examples
+```bash
+# Add worktrees (branches must exist)
+git worktree add ../feature-a feature-a
 
-- Security Reviewer
-- Research Agent
-- Code Writer
+# Create branch + worktree together
+git worktree add -b feature-a ../feature-a main
+```
 
-## Why Custom Subagents?
+**Example — two agents in parallel:**
+```
+java-project/
+├── main/          → main
+├── feature-user/  → Agent 1: User API
+└── feature-order/ → Agent 2: Order API
+```
 
-- Built-in agents are generic
-- Enable specialized workflows
-- Support custom tools, prompts, and models
+### Merge & Cleanup
 
-## Creating Custom Subagents
+```bash
+cd main
+git merge feature/user-api
+git merge feature/order-api
 
-1. Create a Markdown file
-2. Store it in `.claude/agents`
+git worktree remove ../feature-user
+git worktree remove ../feature-order
+```
 
-### Storage Locations
+> Worktrees = parallel isolated workspaces. Merging is still normal Git.
 
-- Project Level
-- Personal Level
+## Playwright MCP
 
-## Triggering Subagents
-1. Automatic
-2. Explicit
+An MCP server that lets Claude Code control and inspect a real browser.
 
-
-## Example Workflows
-1. `/test-feature` - Test Writer → Test Runner
-2. `/self-code-review` - Security Review → Code Quality Review
-
----
-
-# Output Hygiene — 5× Tax
-
-Output tokens cost ~5× more than input tokens. Don't pay Claude to repeat information it already has.
-
-Avoid:
-- Reprinting entire files
-- Echoing long logs/diffs
-- Verbose step-by-step narration
-- Regenerating boilerplate
-
-Do:
-- Ask for concise diffs
-- Edit files in place
-- Summarize changes briefly
-- Let hooks/formatters handle formatting
-
-## CLAUDE.md
-Be concise. Edit in place; don't reprint files.
-Prefer diffs/summaries over full files.
-Don't echo logs or narrate routine steps.
+| Use Case | Description |
+|---|---|
+| **UI Testing** | Execute web application workflows |
+| **DOM Inspection** | Verify elements, attributes, and page state |
+| **Failure Debugging** | Investigate failed UI tests and missing selectors |
+| **E2E Validation** | Verify complete user journeys |
+| **Regression Testing** | Check existing functionality after code changes |
+| **UI Verification** | Validate forms, buttons, navigation, and messages |
 
 ---
 
-# Fewer Turns — Stop Re-sending Context
+# 6. Cost Efficiency
 
-Every turn resends context. More turns = more input tokens and cost.
+## Output Hygiene — 5× Tax
 
-## Why turns cost
-- Full context is sent again each turn
-- Many small turns cost more than one planned turn
-- Cache helps, but reasoning still costs
+Output tokens cost ~5× more than input tokens.
 
-## Cut turn count
-- Plan first, then execute
+| Avoid | Do instead |
+|---|---|
+| Reprinting entire files | Edit files in place |
+| Echoing long logs/diffs | Ask for concise diffs |
+| Verbose step-by-step narration | Summarize changes briefly |
+| Regenerating boilerplate | Let hooks/formatters handle it |
+
+**In CLAUDE.md:** Be concise. Edit in place; don't reprint files. Prefer diffs/summaries. Don't echo logs or narrate routine steps.
+
+## Fewer Turns — Stop Re-sending Context
+
+Every turn resends the full context. More turns = more cost.
+
+**Cut turn count:**
+- Plan first, then execute in one turn
 - Give complete instructions upfront
 - Use `/clear` for stale context
-- Press Esc when Claude goes down the wrong path
+- Press `Esc` when Claude goes down the wrong path
 
-## Expensive
-Add field → validate → migrate → test
-4 turns × full context
+| Expensive | Cheap |
+|---|---|
+| Add field → validate → migrate → test (4 turns) | Plan all steps → approve → execute (1 turn) |
 
-## Cheap
-Plan field + validation + migration + tests → approve → execute
-
-> Rule: Think before it types. Fewer, better turns = lower cost.
+> Think before it types. Fewer, better turns = lower cost.

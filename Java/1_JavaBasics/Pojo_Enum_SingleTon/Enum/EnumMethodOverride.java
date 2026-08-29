@@ -1,4 +1,4 @@
-package Enum;
+package Pojo_Enum_SingleTon.Enum;
 
 public enum EnumMethodOverride {
     SUNDAY {
